@@ -26,6 +26,7 @@ Inside the folder `utils`, create a file `redis.js` that contains the class `Red
 After the class definition, create and export an instance of `RedisClient` called `redisClient`.
 
 ### Example Usage
+```bash
 bob@dylan:~$ cat main.js
 import redisClient from './utils/redis';
 
@@ -46,6 +47,7 @@ null
 12
 null
 bob@dylan:~$
+```
 
 ### Task 1: MongoDB utils
 Inside the folder utils, create a file db.js that contains the class DBClient.
@@ -102,6 +104,7 @@ true
 4
 30
 
+
 ## Task 2: First API
 
 Inside `server.js`, create the Express server:
@@ -144,6 +147,7 @@ bob@dylan:~$
 bob@dylan:~$ curl 0.0.0.0:5000/stats ; echo ""
 {"users":4,"files":30}
 bob@dylan:~$
+```
 
 ## Task 3: Create a New User
 
@@ -186,6 +190,7 @@ bob@dylan:~$
 bob@dylan:~$ curl 0.0.0.0:5000/users -XPOST -H "Content-Type: application/json" -d '{ "email": "bob@dylan.com" }' ; echo ""
 {"error":"Missing password"}
 bob@dylan:~$
+```
 
 ## Task 4: Authenticate a user
 
@@ -234,7 +239,7 @@ curl 0.0.0.0:5000/disconnect -H "X-Token: 031bffac-3edc-4e51-aaae-1c121317da8a"
 
 curl 0.0.0.0:5000/users/me -H "X-Token: 031bffac-3edc-4e51-aaae-1c121317da8a"
 {"error":"Unauthorized"}
-
+```
 
 ## Task 5: First file
 
@@ -325,6 +330,7 @@ bob@dylan:~$
 bob@dylan:~$ ls /tmp/files_manager/
 2a1f4fc3-687b-491a-a3d2-5808a02942c9   51997b88-5c42-42c2-901e-e7f4e71bdc47
 bob@dylan:~$
+```
 
 ## Task 6: Get and list file
 
@@ -369,6 +375,7 @@ bob@dylan:~$
 bob@dylan:~$ curl -XGET 0.0.0.0:5000/files/5f1e8896c7ba06511e683b25 -H "X-Token: f21fb953-16f9-46ed-8d9c-84c6450ec80f" ; echo ""
 {"id":"5f1e8896c7ba06511e683b25","userId":"5f1e7cda04a394508232559d","name":"image.png","type":"image","isPublic":true,"parentId":"5f1e881cc7ba06511e683b23"}
 bob@dylan:~$
+```
 
 ## Task 7: File publish/unpublish
 
@@ -409,6 +416,7 @@ bob@dylan:~$
 bob@dylan:~$ curl -XPUT 0.0.0.0:5000/files/5f1e8896c7ba06511e683b25/unpublish -H "X-Token: f21fb953-16f9-46ed-8d9c-84c6450ec80f" ; echo ""
 {"id":"5f1e8896c7ba06511e683b25","userId":"5f1e7cda04a394508232559d","name":"image.png","type":"image","isPublic":false,"parentId":"5f1e881cc7ba06511e683b23"}
 bob@dylan:~$
+```
 
 ## Task 8: File data
 
@@ -448,6 +456,7 @@ curl -XPUT 0.0.0.0:5000/files/5f1e879ec7ba06511e683b22/publish -H "X-Token: f21f
 
 curl -XGET 0.0.0.0:5000/files/5f1e879ec7ba06511e683b22/data
 Hello Webstack!
+```
 
 ## Task 9: Image Thumbnails
 
