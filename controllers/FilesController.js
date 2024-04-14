@@ -8,7 +8,6 @@ import redisClient from '../utils/redis';
 
 const fileQueue = new Queue('fileQueue', 'redis://127.0.0.1:6379');
 
-// Method to get user from Redis using X-Token
 class FilesController {
   static async getUser(request) {
     const token = request.header('X-Token');
@@ -41,12 +40,12 @@ class FilesController {
     }
     if (!type) {
       return response.status(400).json({ error: 'Missing type' });
-    }
+    } // Handling folder creation
     if (type !== 'folder' && !data) {
       return response.status(400).json({ error: 'Missing data' });
     }
+
     const files = dbClient.db.collection('files');
-    // Checking if parentId exists and is a folder
     if (parentId) {
       const idObject = new ObjectID(parentId);
       const file = await files.findOne({ _id: idObject, userId: user._id });
@@ -56,7 +55,7 @@ class FilesController {
       if (file.type !== 'folder') {
         return response.status(400).json({ error: 'Parent is not a folder' });
       }
-    } // Handling folder creation
+    }
     if (type === 'folder') {
       files.insertOne(
         {
@@ -123,7 +122,7 @@ class FilesController {
     }
     return null;
   }
-  // Method to get file details by ID
+
   static async getShow(request, response) {
     const user = await FilesController.getUser(request);
     if (!user) {
@@ -138,7 +137,7 @@ class FilesController {
     }
     return response.status(200).json(file);
   }
-  // Method to get paginated list of files
+
   static async getIndex(request, response) {
     const user = await FilesController.getUser(request);
     if (!user) {
@@ -155,7 +154,7 @@ class FilesController {
       query = { userId: user._id };
     } else {
       query = { userId: user._id, parentId: ObjectID(parentId) };
-    } // Aggregating files data for pagination
+    }
     files.aggregate(
       [
         { $match: query },
@@ -186,7 +185,7 @@ class FilesController {
     });
     return null;
   }
-  // Method to publish a file
+
   static async putPublish(request, response) {
     const user = await FilesController.getUser(request);
     if (!user) {
@@ -205,7 +204,7 @@ class FilesController {
     });
     return null;
   }
-  // Method to unpublish a file
+
   static async putUnpublish(request, response) {
     const user = await FilesController.getUser(request);
     if (!user) {
@@ -224,7 +223,7 @@ class FilesController {
     });
     return null;
   }
-  // Method to get file content by ID
+
   static async getFile(request, response) {
     const { id } = request.params;
     const files = dbClient.db.collection('files');
@@ -233,10 +232,8 @@ class FilesController {
       if (!file) {
         return response.status(404).json({ error: 'Not found' });
       }
-      console.log(file.localPath);
-      // If file is public	    
+      console.log(file.localPath); // If file is public
       if (file.isPublic) {
-	// Handling file retrieval
         if (file.type === 'folder') {
           return response.status(400).json({ error: "A folder doesn't have content" });
         }
@@ -254,12 +251,10 @@ class FilesController {
           return response.status(404).json({ error: 'Not found' });
         }
       } else {
-	// If file is private
-        const user = await FilesController.getUser(request);
+        const user = await FilesController.getUser(request); // If file is private
         if (!user) {
           return response.status(404).json({ error: 'Not found' });
         }
-	// Check if requesting user is the owner of the file
         if (file.userId.toString() === user._id.toString()) {
           if (file.type === 'folder') {
             return response.status(400).json({ error: "A folder doesn't have content" });
@@ -276,7 +271,7 @@ class FilesController {
             console.log(error);
             return response.status(404).json({ error: 'Not found' });
           }
-        } else { // If requesting user is not the owner of the file
+        } else {
           console.log(`Wrong user: file.userId=${file.userId}; userId=${user._id}`);
           return response.status(404).json({ error: 'Not found' });
         }
@@ -284,5 +279,5 @@ class FilesController {
     });
   }
 }
-// Exporting the FilesController class
-module.exports = FilesController;
+
+module.exports = FilesController; // Exporting the FilesController class
