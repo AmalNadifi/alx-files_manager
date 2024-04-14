@@ -16,12 +16,12 @@ fileQueue.process(async (job, done) => {
   console.log('Processing...');
   const { fileId } = job.data;
   if (!fileId) {
-    done(new Error('Missing fileId'));
+    done(new Error('Missing fileId')); // Error handling for missing fileId
   }
 
   const { userId } = job.data;
   if (!userId) {
-    done(new Error('Missing userId'));
+    done(new Error('Missing userId')); // Error handling for missing userId
   }
 
   console.log(fileId, userId);
@@ -30,9 +30,9 @@ fileQueue.process(async (job, done) => {
   files.findOne({ _id: idObject }, async (err, file) => {
     if (!file) {
       console.log('Not found');
-      done(new Error('File not found'));
+      done(new Error('File not found')); // Error handling for file not found
     } else {
-      const fileName = file.localPath;
+      const fileName = file.localPath; // Getting the local path of the file
       const thumbnail500 = await thumbNail(500, fileName);
       const thumbnail250 = await thumbNail(250, fileName);
       const thumbnail100 = await thumbNail(100, fileName);
@@ -45,20 +45,20 @@ fileQueue.process(async (job, done) => {
       await fs.writeFile(image500, thumbnail500);
       await fs.writeFile(image250, thumbnail250);
       await fs.writeFile(image100, thumbnail100);
-      done();
+      done(); // Completing the job processing
     }
   });
 });
 
 userQueue.process(async (job, done) => {
   const { userId } = job.data;
-  if (!userId) done(new Error('Missing userId'));
+  if (!userId) done(new Error('Missing userId')); // Extracting userId from job data
   const users = dbClient.db.collection('users');
   const idObject = new ObjectID(userId);
   const user = await users.findOne({ _id: idObject });
   if (user) {
-    console.log(`Welcome ${user.email}!`);
+    console.log(`Welcome ${user.email}!`); // Logging a welcome message for the user
   } else {
-    done(new Error('User not found'));
+    done(new Error('User not found')); // Error handling for user not found
   }
 });
