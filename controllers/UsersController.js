@@ -6,6 +6,7 @@ import redisClient from '../utils/redis';
 
 const userQueue = new Queue('userQueue', 'redis://127.0.0.1:6379');
 
+// Method to handle user registration
 class UsersController {
   static postNew(request, response) {
     const { email } = request.body;
@@ -21,6 +22,7 @@ class UsersController {
     }
 
     const users = dbClient.db.collection('users');
+    // Checking if user with the provided email already exists
     users.findOne({ email }, (err, user) => {
       if (user) {
         response.status(400).json({ error: 'Already exist' });
@@ -38,7 +40,7 @@ class UsersController {
       }
     });
   }
-
+  // Method to get user details by token
   static async getMe(request, response) {
     const token = request.header('X-Token');
     const key = `auth_${token}`;
@@ -46,18 +48,23 @@ class UsersController {
     if (userId) {
       const users = dbClient.db.collection('users');
       const idObject = new ObjectID(userId);
+      // Finding user by userId
       users.findOne({ _id: idObject }, (err, user) => {
         if (user) {
+	  // Sending user details in response
           response.status(200).json({ id: userId, email: user.email });
         } else {
+	  // Sending Unauthorized error if user not found
           response.status(401).json({ error: 'Unauthorized' });
         }
       });
     } else {
       console.log('Hupatikani!');
+      // Sending Unauthorized error if token not found in Redis cache
       response.status(401).json({ error: 'Unauthorized' });
     }
   }
 }
 
+// Exporting the UsersController class
 module.exports = UsersController;

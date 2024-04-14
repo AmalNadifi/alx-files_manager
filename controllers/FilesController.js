@@ -8,8 +8,8 @@ import redisClient from '../utils/redis';
 
 const fileQueue = new Queue('fileQueue', 'redis://127.0.0.1:6379');
 
+// Method to get user from Redis using X-Token
 class FilesController {
-    // Method to get user from Redis using X-Token
   static async getUser(request) {
     const token = request.header('X-Token');
     const key = `auth_${token}`;
@@ -45,9 +45,8 @@ class FilesController {
     if (type !== 'folder' && !data) {
       return response.status(400).json({ error: 'Missing data' });
     }
-
     const files = dbClient.db.collection('files');
-     // Checking if parentId exists and is a folder
+    // Checking if parentId exists and is a folder
     if (parentId) {
       const idObject = new ObjectID(parentId);
       const file = await files.findOne({ _id: idObject, userId: user._id });
@@ -78,19 +77,18 @@ class FilesController {
         console.log(error);
       });
     } else {
-        // Handling file upload
       const filePath = process.env.FOLDER_PATH || '/tmp/files_manager';
       const fileName = `${filePath}/${uuidv4()}`;
       const buff = Buffer.from(data, 'base64');
+      // const storeThis = buff.toString('utf-8');
       try {
-         // Creating directory if it doesn't exist
         try {
           await fs.mkdir(filePath);
         } catch (error) {
+        // pass. Error raised when file already exists
         }
         await fs.writeFile(fileName, buff, 'utf-8');
       } catch (error) {
-         // Error raised when file already exists, so ignoring
         console.log(error);
       }
       files.insertOne(
@@ -113,7 +111,6 @@ class FilesController {
             parentId: parentId || 0,
           },
         );
-        // Adding file processing job to queue if it's an image
         if (type === 'image') {
           fileQueue.add(
             {
@@ -126,7 +123,7 @@ class FilesController {
     }
     return null;
   }
-// Method to get file details by ID
+  // Method to get file details by ID
   static async getShow(request, response) {
     const user = await FilesController.getUser(request);
     if (!user) {
@@ -141,7 +138,7 @@ class FilesController {
     }
     return response.status(200).json(file);
   }
- // Method to get paginated list of files
+  // Method to get paginated list of files
   static async getIndex(request, response) {
     const user = await FilesController.getUser(request);
     if (!user) {
@@ -158,8 +155,7 @@ class FilesController {
       query = { userId: user._id };
     } else {
       query = { userId: user._id, parentId: ObjectID(parentId) };
-    }
-    // Aggregating files data for pagination
+    } // Aggregating files data for pagination
     files.aggregate(
       [
         { $match: query },
@@ -190,7 +186,7 @@ class FilesController {
     });
     return null;
   }
- // Method to publish a file
+  // Method to publish a file
   static async putPublish(request, response) {
     const user = await FilesController.getUser(request);
     if (!user) {
@@ -209,7 +205,7 @@ class FilesController {
     });
     return null;
   }
-// Method to unpublish a file
+  // Method to unpublish a file
   static async putUnpublish(request, response) {
     const user = await FilesController.getUser(request);
     if (!user) {
@@ -228,7 +224,7 @@ class FilesController {
     });
     return null;
   }
-// Method to get file content by ID
+  // Method to get file content by ID
   static async getFile(request, response) {
     const { id } = request.params;
     const files = dbClient.db.collection('files');
@@ -238,9 +234,9 @@ class FilesController {
         return response.status(404).json({ error: 'Not found' });
       }
       console.log(file.localPath);
-    // If file is public
+      // If file is public	    
       if (file.isPublic) {
-        // Handling file retrieval
+	// Handling file retrieval
         if (file.type === 'folder') {
           return response.status(400).json({ error: "A folder doesn't have content" });
         }
@@ -258,12 +254,12 @@ class FilesController {
           return response.status(404).json({ error: 'Not found' });
         }
       } else {
-        // If file is private
+	// If file is private
         const user = await FilesController.getUser(request);
         if (!user) {
           return response.status(404).json({ error: 'Not found' });
         }
-        // Check if requesting user is the owner of the file
+	// Check if requesting user is the owner of the file
         if (file.userId.toString() === user._id.toString()) {
           if (file.type === 'folder') {
             return response.status(400).json({ error: "A folder doesn't have content" });
@@ -280,8 +276,7 @@ class FilesController {
             console.log(error);
             return response.status(404).json({ error: 'Not found' });
           }
-        } else {
-            // If requesting user is not the owner of the file
+        } else { // If requesting user is not the owner of the file
           console.log(`Wrong user: file.userId=${file.userId}; userId=${user._id}`);
           return response.status(404).json({ error: 'Not found' });
         }
