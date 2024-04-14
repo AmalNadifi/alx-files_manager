@@ -14,7 +14,7 @@ async function thumbNail(width, localPath) {
 
 fileQueue.process(async (job, done) => {
   console.log('Processing...');
-  const { fileId } = job.data;
+  const { fileId } = job.data; // Extracting fileId from job data
   if (!fileId) {
     done(new Error('Missing fileId')); // Error handling for missing fileId
   }
